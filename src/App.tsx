@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Login from './components/features/auth/Login';
+import Dashboard from './components/layout/Dashboard';
 
 function App() {
   // For demo purposes, we'll assume the user is not authenticated initially
