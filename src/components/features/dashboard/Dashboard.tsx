@@ -1,50 +1,26 @@
 import React, { useState } from 'react';
-import { Search, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Settings, ChevronLeft, ChevronRight, LogOut } from 'lucide-react'; 
 
-interface Vehicle {
-  no_inv: string;
-  año: string;
-  dias_inventario: number;
-  auto_version: string;
-  precio_venta: string;
-  origen: string;
-  ubicacion: string;
-  vin: string;
-  color: string;
-  observaciones: string;
+// Define la interfaz para las props del componente
+interface DashboardProps {
+  onLogout: () => void;
 }
 
-function Dashboard() {
+// Cambiar la declaración del componente para usar React.FC
+const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedOrigin, setSelectedOrigin] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
 
-  // Sample data
-  const vehicles: Vehicle[] = [
-    {
-      no_inv: "90538",
-      año: "2018",
-      dias_inventario: 0,
-      auto_version: "SPARK NG LTZ G* CVT",
-      precio_venta: "$169,900.00",
-      origen: "Macroplaza",
-      ubicacion: "Macroplaza",
-      vin: "KL8CM6CA3JC446788",
-      color: "GRIS",
-      observaciones: "BM - GRIS - 1 DUEÑO"
-    },
-    // Add more sample data as needed
-  ];
-
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6">
-        {/* Header */}
+        {/* Header with added logout button */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <img
-              src="https://www.granauto.mx/images/logo.png"
+              src="/api/placeholder/100/48"
               alt="Grupo Gran Auto"
               className="h-12"
             />
@@ -53,6 +29,15 @@ function Dashboard() {
               <h2 className="text-lg text-gray-600">Inventario Seminuevos</h2>
             </div>
           </div>
+          
+          {/* Logout Button */}
+          <button 
+            onClick={onLogout}
+            className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+          >
+            <LogOut className="h-5 w-5 mr-2" />
+            Cerrar Sesión
+          </button>
         </div>
 
         {/* Filters */}
@@ -131,20 +116,6 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {vehicles.map((vehicle, index) => (
-                <tr key={index}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.no_inv}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.año}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.dias_inventario}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.auto_version}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.precio_venta}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.origen}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.ubicacion}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.vin}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.color}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{vehicle.observaciones}</td>
-                </tr>
-              ))}
             </tbody>
           </table>
         </div>
@@ -166,6 +137,6 @@ function Dashboard() {
       </div>
     </div>
   );
-}
+};
 
 export default Dashboard;
