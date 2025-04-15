@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Settings, ChevronLeft, ChevronRight, LogOut, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../../context/themeContext'; // Importar el contexto del tema
+import granautoLogo from '../../../assets/granauto.png';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -20,7 +21,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
             <img
-              src="/api/placeholder/100/48"
+              src={granautoLogo}
               alt="Grupo Gran Auto"
               className="h-12"
             />

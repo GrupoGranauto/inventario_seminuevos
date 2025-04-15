@@ -86,7 +86,7 @@ function Login({ onLoginSuccess }: LoginProps) {
                 onClick={handleGoogleLogin}
                 className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300"
               >
-                <img src={googleLogo} alt="Google" className="h-5 w-5 mr-2" /> {/* Usar el icono importado */}
+                <img src={googleLogo} alt="Google" className="h-5 w-5 mr-2" />
                 CONTINUAR CON GOOGLE
               </button>
             </div>
