@@ -5,8 +5,7 @@ import Dashboard from './components/features/dashboard/Dashboard';
 import { ThemeProvider } from './context/themeContext'; 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const GOOGLE_CLIENT_ID = ""; 
-//console.log("Google Client ID:", GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_ID = "573195873234-311suvsf310lr4ggn9t9m6i5u8l9381u.apps.googleusercontent.com"; 
 
 function App() {
   // Verificar si el usuario está autenticado (desde localStorage)

@@ -1,26 +1,49 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface ThemeContextProps {
+interface ThemeContextType {
   darkMode: boolean;
   toggleDarkMode: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  darkMode: false,
+  toggleDarkMode: () => {},
+});
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [darkMode, setDarkMode] = useState(false);
+interface ThemeProviderProps {
+  children: ReactNode;
+}
 
-  // Aplica la clase cuando se cambia de estado
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+  // Intentar obtener la preferencia del modo oscuro del localStorage
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      const savedMode = localStorage.getItem('darkMode');
+      return savedMode === 'true' ? true : false;
+    } catch (error) {
+      console.error('Error al leer darkMode de localStorage:', error);
+      return false;
+    }
+  });
+
+  // Actualizar el localStorage y el DOM cuando cambie el modo
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    try {
+      localStorage.setItem('darkMode', darkMode.toString());
+      
+      // Actualizar las clases del documento
+      if (darkMode) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } catch (error) {
+      console.error('Error al guardar darkMode en localStorage:', error);
     }
   }, [darkMode]);
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+    setDarkMode(prev => !prev);
   };
 
   return (
@@ -30,10 +53,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-};
+export const useTheme = () => useContext(ThemeContext);
+
+export default ThemeContext;
