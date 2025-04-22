@@ -4,7 +4,8 @@ import { Search, Settings, ChevronLeft, ChevronRight, LogOut, Sun, Moon, Menu } 
 import { useTheme } from '../../../context/themeContext';
 import granautoLogo from '../../../assets/granauto.png';
 import granautoLogoB from '../../../assets/granautob.png';
-import invSeminuevosCSV from '../../../assets/data/inv_seminuevos.csv'
+import invSeminuevosCSV from '../../../assets/data/inv_seminuevos.csv';
+import DashboardFilters, { FilterValues } from './DashboardFilters';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -13,14 +14,13 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const { darkMode, toggleDarkMode } = useTheme();
   const [tableData, setTableData] = useState<any[]>([]); 
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 25;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const [currentRecords, setCurrentRecords] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -60,7 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             'GUAYMAS SEMINUEVOS': 'Guaymas',
             'NAVOJOA': 'Navojoa',
             'PUERTO  PEÑASCO': 'Puerto Peñasco',
-            'MORELIA': 'Morelia',
+            'MORELIA': 'Morelos',
             'SALA MORELOS': 'Morelos',
             'SALA NISSAUTO': 'Nissauto',
             'NISSAUTO': 'Nissauto',
@@ -107,6 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           });
   
           setTableData(sortedData);
+          setFilteredData(sortedData);
           setTotalPages(Math.ceil(sortedData.length / recordsPerPage));
           setLoading(false);
         },
@@ -123,12 +124,46 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     }
   }, []);
 
-  // Actualizar registros actuales cuando cambia la página o los datos
+  // Manejo de cambios en los filtros
+  const handleFilterChange = (filters: FilterValues) => {
+    // Resetear a la primera página cuando se aplican filtros
+    setCurrentPage(1);
+    
+    // Filtrar datos según los criterios
+    const filtered = tableData.filter(row => {
+      // Búsqueda por texto en múltiples campos
+      const searchMatch = !filters.searchText || 
+        Object.values(row).some(value => 
+          value && String(value).toLowerCase().includes(filters.searchText.toLowerCase())
+        );
+      
+      // Filtro por ubicación
+      const ubicacionMatch = !filters.ubicacion || row.Ubicacion === filters.ubicacion;
+      
+      // Filtro por origen
+      const origenMatch = !filters.origen || row.Origen === filters.origen;
+      
+      // Filtro por rango de días en inventario
+      const diasEnInv = parseInt(row.DiasEnInv ?? '0', 10);
+      const minDiasMatch = !filters.minDiasEnInv || diasEnInv >= parseInt(filters.minDiasEnInv, 10);
+      const maxDiasMatch = !filters.maxDiasEnInv || diasEnInv <= parseInt(filters.maxDiasEnInv, 10);
+      
+      return searchMatch && ubicacionMatch && origenMatch && minDiasMatch && maxDiasMatch;
+    });
+    
+    setFilteredData(filtered);
+    setTotalPages(Math.ceil(filtered.length / recordsPerPage));
+  };
+
+  // Actualizar registros actuales cuando cambia la página o los datos filtrados
   useEffect(() => {
-    if (tableData.length > 0) {
-      setCurrentRecords(tableData.slice(indexOfFirstRecord, indexOfLastRecord));
+    const indexOfLastRecord = currentPage * recordsPerPage;
+    const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+    
+    if (filteredData.length > 0) {
+      setCurrentRecords(filteredData.slice(indexOfFirstRecord, indexOfLastRecord));
     }
-  }, [tableData, currentPage, indexOfFirstRecord, indexOfLastRecord]);
+  }, [filteredData, currentPage, recordsPerPage]);
 
   // Funciones para la paginación
   const nextPage = () => {
@@ -180,17 +215,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       minimumFractionDigits: 2,
     }).format(numericValue);
   };
-  
-
-  // Verificación de renderizado
-  console.log('Rendering Dashboard with:', { 
-    darkMode, 
-    loading, 
-    error, 
-    dataLength: tableData.length,
-    currentPage,
-    totalPages
-  });
 
   if (error) {
     return (
@@ -253,6 +277,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           </div>
         </div>
 
+        {/* Componente de filtros */}
+        {!loading && <DashboardFilters onFilterChange={handleFilterChange} />}
+
         {/* Área de contenido principal */}
         {loading ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 flex justify-center items-center">
@@ -265,14 +292,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             {currentRecords.length === 0 ? (
               <div className="p-8 text-center">
-                <p>No hay datos disponibles</p>
+                <p>No hay datos disponibles que coincidan con los filtros seleccionados</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         #
                       </th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -308,33 +335,36 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {currentRecords.map((row, index) => (
-                      <tr key={index}>
-                        {/* Nueva columna para enumerar las filas */}
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                          {indexOfFirstRecord + index + 1}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['No']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Anio']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['DiasEnInv']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Caracteristicas']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                          {formatCurrency(row['PrecioVta'])}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Origen']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Ubicacion']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Numero']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Color']}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Obs_Veh']}</td>
-                      </tr>
-                    ))}
+                    {currentRecords.map((row, index) => {
+                      const indexOfFirstRecord = (currentPage - 1) * recordsPerPage;
+                      return (
+                        <tr key={index}>
+                          {/* Nueva columna para enumerar las filas */}
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                            {indexOfFirstRecord + index + 1}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['No']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Anio']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['DiasEnInv']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Caracteristicas']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                            {formatCurrency(row['PrecioVta'])}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Origen']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Ubicacion']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Numero']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Color']}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Obs_Veh']}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
 
             {/* Paginación */}
-            {tableData.length > 0 && (
+            {filteredData.length > 0 && (
               <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 flex justify-between sm:hidden">
@@ -419,13 +449,17 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         )}
 
         {/* Información sobre paginación */}
-        {!loading && tableData.length > 0 && (
-          <div className="mt-2 mb-4 text-sm">
-            <p>
-              Mostrando registros {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, tableData.length)} de {tableData.length}
-            </p>
-          </div>
-        )}
+        {!loading && tableData.length > 0 && (() => {
+          const indexOfLastRecord = currentPage * recordsPerPage;
+          const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+          return (
+            <div className="mt-2 mb-4 text-sm">
+              <p>
+                Mostrando registros {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, tableData.length)} de {tableData.length}
+              </p>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

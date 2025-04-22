@@ -4,8 +4,9 @@ import Login from './components/features/auth/Login';
 import Dashboard from './components/features/dashboard/Dashboard';
 import { ThemeProvider } from './context/themeContext'; 
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import SessionTimeoutAlert from './components/common/SessionTimeoutAlert';
 
-const GOOGLE_CLIENT_ID = ""; 
+const GOOGLE_CLIENT_ID = "."; 
 
 function App() {
   // Verificar si el usuario está autenticado (desde localStorage)
@@ -43,7 +44,7 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <ThemeProvider> {/* Envolver la aplicación con ThemeProvider */}
+      <ThemeProvider>
         <Router>
           <Routes>
             <Route 
@@ -60,6 +61,14 @@ function App() {
             {/* Ruta para capturar cualquier otra URL no definida */}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
+          
+          {/* Componente de alerta de sesión */}
+          <SessionTimeoutAlert 
+            isAuthenticated={isAuthenticated}
+            onLogout={handleLogout}
+            warningTime={60000}  // 1 minuto de advertencia
+            inactiveTime={15 * 60 * 1000}  // 15 minutos de inactividad
+          />
         </Router>
       </ThemeProvider>
     </GoogleOAuthProvider>
