@@ -23,6 +23,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const recordsPerPage = 25;
   const [currentRecords, setCurrentRecords] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState(0);
+  
+  // Estado para la fila seleccionada
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
   // Define the type for a row of your CSV data
   interface InventoryRow {
@@ -106,9 +109,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             return diasA - diasB;
           });
   
-          setTableData(sortedData);
-          setFilteredData(sortedData);
-          setTotalPages(Math.ceil(sortedData.length / recordsPerPage));
+          // Filtrar los datos para mostrar solo registros con precio > 1
+          const filteredByPrice = sortedData.filter(row => {
+            const precioStr = row.PrecioVta ?? '0';
+            const precio = parseFloat(precioStr.replace(/[^0-9.-]+/g, ''));
+            return precio > 1;
+          });
+  
+          setTableData(filteredByPrice);
+          setFilteredData(filteredByPrice);
+          setTotalPages(Math.ceil(filteredByPrice.length / recordsPerPage));
           setLoading(false);
         },
         error: (error) => {
@@ -128,6 +138,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const handleFilterChange = (filters: FilterValues) => {
     // Resetear a la primera página cuando se aplican filtros
     setCurrentPage(1);
+    // Limpiar la selección cuando se cambian los filtros
+    setSelectedRow(null);
     
     // Filtrar datos según los criterios
     const filtered = tableData.filter(row => {
@@ -148,7 +160,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       const minDiasMatch = !filters.minDiasEnInv || diasEnInv >= parseInt(filters.minDiasEnInv, 10);
       const maxDiasMatch = !filters.maxDiasEnInv || diasEnInv <= parseInt(filters.maxDiasEnInv, 10);
       
-      return searchMatch && ubicacionMatch && origenMatch && minDiasMatch && maxDiasMatch;
+      // Precio mayor que 1
+      const precioStr = row.PrecioVta ?? '0';
+      const precio = parseFloat(precioStr.replace(/[^0-9.-]+/g, ''));
+      const precioMatch = precio > 1;
+      
+      return searchMatch && ubicacionMatch && origenMatch && minDiasMatch && maxDiasMatch && precioMatch;
     });
     
     setFilteredData(filtered);
@@ -163,6 +180,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     if (filteredData.length > 0) {
       setCurrentRecords(filteredData.slice(indexOfFirstRecord, indexOfLastRecord));
     }
+    
+    // Reset selected row when changing page
+    setSelectedRow(null);
   }, [filteredData, currentPage, recordsPerPage]);
 
   // Funciones para la paginación
@@ -181,6 +201,16 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   const goToPage = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
+    }
+  };
+
+  // Manejador de click para seleccionar una fila
+  const handleRowClick = (index: number) => {
+    // Si la fila ya está seleccionada, deseleccionarla
+    if (selectedRow === index) {
+      setSelectedRow(null);
+    } else {
+      setSelectedRow(index);
     }
   };
 
@@ -233,6 +263,21 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
     );
   }
 
+  // Definición de anchos fijos para cada columna
+  const columnWidths = {
+    index: '50px',          // #
+    no: '70px',             // No. Inv
+    anio: '70px',           // Año
+    diasInv: '100px',       // Días en inventario
+    caracteristicas: '200px', // Auto versión
+    precioVta: '120px',     // Precio de venta
+    origen: '120px',        // Origen
+    ubicacion: '120px',     // Ubicación
+    numero: '150px',        // Vin
+    color: '100px',         // Color
+    obsVeh: '200px',        // Observaciones vehículo
+  };
+
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
       {/* Contenedor principal */}
@@ -256,7 +301,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ml-auto">
             {/* Cambio de tema */}
             <button
               onClick={toggleDarkMode}
@@ -289,47 +334,81 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             </div>
           </div>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             {currentRecords.length === 0 ? (
               <div className="p-8 text-center">
                 <p>No hay datos disponibles que coincidan con los filtros seleccionados</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+              // Tamaño de la tabla
+              <div className="overflow-auto" style={{ height: '640px' }}>
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+                  <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.index }}
+                      >
                         #
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.no }}
+                      >
                         No. Inv
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.anio }}
+                      >
                         Año
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.diasInv }}
+                      >
                         Días en inventario
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.caracteristicas }}
+                      >
                         Auto versión
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.precioVta }}
+                      >
                         Precio de venta
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.origen }}
+                      >
                         Origen
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.ubicacion }}
+                      >
                         Ubicación
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.numero }}
+                      >
                         Vin
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.color }}
+                      >
                         Color
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      <th 
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
+                        style={{ width: columnWidths.obsVeh }}
+                      >
                         Observaciones vehículo
                       </th>
                     </tr>
@@ -337,24 +416,115 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {currentRecords.map((row, index) => {
                       const indexOfFirstRecord = (currentPage - 1) * recordsPerPage;
+                      const isEven = (indexOfFirstRecord + index) % 2 === 0;
+                      const isSelected = selectedRow === index;
+                      
                       return (
-                        <tr key={index}>
+                        <tr 
+                          key={index}
+                          className={`
+                            cursor-pointer
+                            ${isEven ? 
+                              "bg-gray-50 dark:bg-gray-700/40" : 
+                              "bg-white dark:bg-gray-800"}
+                            ${isSelected ? 
+                              // Selección de fila 
+                              "outline outline-2 outline-blue-500 dark:outline-blue-400 relative z-10" : 
+                              ""}
+                            hover:bg-blue-50 dark:hover:bg-blue-900/30 
+                            transition-colors duration-150
+                          `}
+                          onClick={() => handleRowClick(index)}
+                        >
                           {/* Nueva columna para enumerar las filas */}
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.index, maxWidth: columnWidths.index }}
+                          >
                             {indexOfFirstRecord + index + 1}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['No']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Anio']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['DiasEnInv']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Caracteristicas']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.no, maxWidth: columnWidths.no }}
+                            title={row['No']}
+                          >
+                            {row['No']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.anio, maxWidth: columnWidths.anio }}
+                            title={row['Anio']}
+                          >
+                            {row['Anio']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.diasInv, maxWidth: columnWidths.diasInv }}
+                            title={row['DiasEnInv']}
+                          >
+                            {row['DiasEnInv']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
+                            style={{ 
+                              width: columnWidths.caracteristicas, 
+                              maxWidth: columnWidths.caracteristicas,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                            title={row['Caracteristicas']}
+                          >
+                            {row['Caracteristicas']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.precioVta, maxWidth: columnWidths.precioVta }}
+                            title={formatCurrency(row['PrecioVta'])}
+                          >
                             {formatCurrency(row['PrecioVta'])}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Origen']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Ubicacion']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Numero']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Color']}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">{row['Obs_Veh']}</td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.origen, maxWidth: columnWidths.origen }}
+                            title={row['Origen']}
+                          >
+                            {row['Origen']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.ubicacion, maxWidth: columnWidths.ubicacion }}
+                            title={row['Ubicacion']}
+                          >
+                            {row['Ubicacion']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.numero, maxWidth: columnWidths.numero }}
+                            title={row['Numero']}
+                          >
+                            {row['Numero']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
+                            style={{ width: columnWidths.color, maxWidth: columnWidths.color }}
+                            title={row['Color']}
+                          >
+                            {row['Color']}
+                          </td>
+                          <td 
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
+                            style={{ 
+                              width: columnWidths.obsVeh, 
+                              maxWidth: columnWidths.obsVeh,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}
+                            title={row['Obs_Veh']}
+                          >
+                            {row['Obs_Veh']}
+                          </td>
                         </tr>
                       );
                     })}
@@ -454,8 +624,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
           const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
           return (
             <div className="mt-2 mb-4 text-sm">
-              <p>
-                Mostrando registros {indexOfFirstRecord + 1}-{Math.min(indexOfLastRecord, tableData.length)} de {tableData.length}
+              <p className="text-sm text-gray-500">
+                Mostrando registros {indexOfFirstRecord + 1}–{Math.min(indexOfLastRecord, filteredData.length)} de {filteredData.length}
               </p>
             </div>
           );

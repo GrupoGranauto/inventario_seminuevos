@@ -6,7 +6,7 @@ import { ThemeProvider } from './context/themeContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import SessionTimeoutAlert from './components/common/SessionTimeoutAlert';
 
-const GOOGLE_CLIENT_ID = "."; 
+const GOOGLE_CLIENT_ID = ""; 
 
 function App() {
   // Verificar si el usuario está autenticado (desde localStorage)

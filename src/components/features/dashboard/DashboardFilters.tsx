@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Box, TextField, Button, FormControl, InputLabel, Select, MenuItem, InputAdornment, SelectChangeEvent } from '@mui/material';
 import { Search } from 'lucide-react';
 
 interface DashboardFiltersProps {
@@ -13,6 +14,23 @@ export interface FilterValues {
   maxDiasEnInv: string;
 }
 
+// Datos para los menús desplegables
+const ubicaciones = [
+  { value: "Agua Prieta", label: "Agua Prieta" },
+  { value: "Caborca", label: "Caborca" },
+  { value: "Cananea", label: "Cananea" },
+  { value: "Nogales", label: "Nogales" },
+  { value: "Magdalena", label: "Magdalena" },
+  { value: "Guaymas", label: "Guaymas" },
+  { value: "Navojoa", label: "Navojoa" },
+  { value: "Puerto Peñasco", label: "Puerto Peñasco" },
+  { value: "Morelia", label: "Morelia" },
+  { value: "Morelos", label: "Morelos" },
+  { value: "Nissauto", label: "Nissauto" },
+  { value: "Macroplaza", label: "Macroplaza" },
+  { value: "Granauto", label: "Granauto" }
+];
+
 const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) => {
   const [filters, setFilters] = useState<FilterValues>({
     searchText: '',
@@ -22,7 +40,14 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
     maxDiasEnInv: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const updatedFilters = { ...filters, [name]: value };
+    setFilters(updatedFilters);
+    onFilterChange(updatedFilters);
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
     const updatedFilters = { ...filters, [name]: value };
     setFilters(updatedFilters);
@@ -43,104 +68,136 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6">
-      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Filtros</h3>
+      {/* <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Filtros</h3> */}
       
-      <div className="flex flex-wrap gap-4">
+      <Box sx={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        gap: 2,
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: 'rgba(0, 0, 0, 0.23)',
+          },
+          '&:hover fieldset': {
+            borderColor: 'rgba(0, 0, 0, 0.23)',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#1976d2',
+          },
+        },
+        '& .MuiInputLabel-root': {
+          color: 'rgba(0, 0, 0, 0.6)',
+        },
+        '& .MuiInputBase-input': {
+          color: 'inherit',
+        },
+        '.dark &': {
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: 'rgba(255, 255, 255, 0.23)',
+            },
+            '&:hover fieldset': {
+              borderColor: 'rgba(255, 255, 255, 0.23)',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#90caf9',
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: 'rgba(255, 255, 255, 0.7)',
+          },
+          '& .MuiInputBase-input': {
+            color: 'white',
+          },
+          '& .MuiSvgIcon-root': {
+            color: 'rgba(255, 255, 255, 0.7)',
+          },
+        }
+      }}>
         {/* Búsqueda general */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            name="searchText"
-            value={filters.searchText}
-            onChange={handleInputChange}
-            placeholder="Buscar..."
-            className="block w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          />
-        </div>
+        <TextField
+          name="searchText"
+          label="Buscar"
+          variant="outlined"
+          value={filters.searchText}
+          onChange={handleInputChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search className="h-5 w-5 text-gray-400" />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: '260px' }}
+        />
 
         {/* Filtro por ubicación */}
-        <div>
-          <select
+        <FormControl sx={{ minWidth: '200px' }}>
+          <InputLabel id="ubicacion-label">Ubicación</InputLabel>
+          <Select
+            labelId="ubicacion-label"
+            id="ubicacion"
             name="ubicacion"
             value={filters.ubicacion}
-            onChange={handleInputChange}
-            className="block w-48 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            label="Ubicación"
+            onChange={handleSelectChange}
           >
-            <option value="">Todas las ubicaciones</option>
-            <option value="Agua Prieta">Agua Prieta</option>
-            <option value="Caborca">Caborca</option>
-            <option value="Cananea">Cananea</option>
-            <option value="Nogales">Nogales</option>
-            <option value="Magdalena">Magdalena</option>
-            <option value="Guaymas">Guaymas</option>
-            <option value="Navojoa">Navojoa</option>
-            <option value="Puerto Peñasco">Puerto Peñasco</option>
-            <option value="Morelia">Morelia</option>
-            <option value="Morelos">Morelos</option>
-            <option value="Nissauto">Nissauto</option>
-            <option value="Macroplaza">Macroplaza</option>
-            <option value="Granauto">Granauto</option>
-          </select>
-        </div>
-
-        {/* Filtro por origen */}
-        <div>
-          <select
-            name="origen"
-            value={filters.origen}
-            onChange={handleInputChange}
-            className="block w-48 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          >
-            <option value="">Todos los orígenes</option>
-            <option value="Agua Prieta">Agua Prieta</option>
-            <option value="Caborca">Caborca</option>
-            <option value="Cananea">Cananea</option>
-            <option value="Magdalena">Magdalena</option>
-            <option value="Navojoa">Navojoa</option>
-            <option value="Nogales">Nogales</option>
-            <option value="Puerto Peñasco">Puerto Peñasco</option>
-            <option value="Guaymas">Guaymas</option>
-            <option value="Morelos">Morelos</option>
-            <option value="Macroplaza">Macroplaza</option>
-            <option value="Granauto">Granauto</option>
-            <option value="Nissauto">Nissauto</option>
-          </select>
-        </div>
+            <MenuItem value="">Todas las ubicaciones</MenuItem>
+            {ubicaciones.map((ubicacion) => (
+              <MenuItem key={ubicacion.value} value={ubicacion.value}>
+                {ubicacion.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         {/* Rango de días en inventario */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="number"
-            name="minDiasEnInv"
-            value={filters.minDiasEnInv}
-            onChange={handleInputChange}
-            placeholder="Min días"
-            min="0"
-            className="block w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          />
+        <TextField
+          name="minDiasEnInv"
+          label="Min días"
+          type="number"
+          value={filters.minDiasEnInv}
+          onChange={handleInputChange}
+          InputProps={{ inputProps: { min: 0 } }}
+          sx={{ width: '120px' }}
+        />
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', mx: 1 }}>
           <span className="text-gray-500">a</span>
-          <input
-            type="number"
-            name="maxDiasEnInv"
-            value={filters.maxDiasEnInv}
-            onChange={handleInputChange}
-            placeholder="Max días"
-            min="0"
-            className="block w-24 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-          />
-        </div>
+        </Box>
+        
+        <TextField
+          name="maxDiasEnInv"
+          label="Max días"
+          type="number"
+          value={filters.maxDiasEnInv}
+          onChange={handleInputChange}
+          InputProps={{ inputProps: { min: 0 } }}
+          sx={{ width: '120px' }}
+        />
 
         {/* Botón de reset */}
-        <button
+        <Button 
+          variant="contained" 
           onClick={handleReset}
-          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          sx={{ 
+            backgroundColor: 'rgba(229, 231, 235, 1)',
+            color: 'rgba(31, 41, 55, 1)',
+            '&:hover': {
+              backgroundColor: 'rgba(209, 213, 219, 1)',
+            },
+            '.dark &': {
+              backgroundColor: 'rgba(55, 65, 81, 1)',
+              color: 'rgba(229, 231, 235, 1)',
+              '&:hover': {
+                backgroundColor: 'rgba(75, 85, 99, 1)',
+              }
+            }
+          }}
         >
           Limpiar filtros
-        </button>
-      </div>
+        </Button>
+      </Box>
     </div>
   );
 };
