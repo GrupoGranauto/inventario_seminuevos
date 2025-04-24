@@ -5,8 +5,11 @@ import Dashboard from './components/features/dashboard/Dashboard';
 import { ThemeProvider } from './context/themeContext'; 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import SessionTimeoutAlert from './components/common/SessionTimeoutAlert';
+//import dotenv from 'dotenv';
 
-const GOOGLE_CLIENT_ID = ""; 
+//dotenv.config();
+
+const GOOGLE_CLIENT_ID = ''; 
 
 function App() {
   // Verificar si el usuario está autenticado (desde localStorage)
@@ -34,7 +37,8 @@ function App() {
       setIsAuthenticated(localStorage.getItem('isAuthenticated') === 'true');
     };
 
-    // Escuchar cambios en localStorage (aunque esto es simplificado)
+    // Escuchar cambios en localStorage
+    // Esto es útil si la autenticación se maneja en otro lugar de la aplicación
     window.addEventListener('storage', checkAuth);
     
     return () => {

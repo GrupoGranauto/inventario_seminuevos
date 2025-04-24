@@ -29,7 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
 
   // Define the type for a row of your CSV data
   interface InventoryRow {
-    No?: string;
+    NumeroInventario?: string;
     Anio?: string;
     DiasEnInv?: string;
     Caracteristicas?: string;
@@ -99,6 +99,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
               ...row,
               Ubicacion: ubicacionMap[row['Ubicacion'] ?? ''] || 'OTRO', 
               Origen: origenMap[row['Origen'] ?? ''] || 'OTRO', 
+              // Ensure DiasEnInv is "0" when it's 0 (not an empty string)
+              DiasEnInv: String(row['DiasEnInv']) === '' ? '0' : row['DiasEnInv']
             };
           });
   
@@ -266,7 +268,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   // Definición de anchos fijos para cada columna
   const columnWidths = {
     index: '50px',          // #
-    no: '70px',             // No. Inv
+    numeroInventario: '70px',             // No. Inv
     anio: '70px',           // Año
     diasInv: '100px',       // Días en inventario
     caracteristicas: '200px', // Auto versión
@@ -353,7 +355,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                       </th>
                       <th 
                         className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.no }}
+                        style={{ width: columnWidths.numeroInventario }}
                       >
                         No. Inv
                       </th>
@@ -444,11 +446,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                             {indexOfFirstRecord + index + 1}
                           </td>
                           <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.no, maxWidth: columnWidths.no }}
-                            title={row['No']}
+                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate" 
+                            style={{ width: columnWidths.numeroInventario, maxWidth: columnWidths.numeroInventario }}
+                            title={row['NumeroInventario'] || row['No']}
                           >
-                            {row['No']}
+                            {row['NumeroInventario'] || row['No']}
                           </td>
                           <td 
                             className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
@@ -460,9 +462,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                           <td 
                             className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
                             style={{ width: columnWidths.diasInv, maxWidth: columnWidths.diasInv }}
-                            title={row['DiasEnInv']}
+                            title={row['DiasEnInv'] === undefined || row['DiasEnInv'] === null ? '0' : row['DiasEnInv']}
                           >
-                            {row['DiasEnInv']}
+                            {row['DiasEnInv'] === undefined || row['DiasEnInv'] === null ? '0' : row['DiasEnInv']}
                           </td>
                           <td 
                             className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
@@ -480,9 +482,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
                           <td 
                             className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
                             style={{ width: columnWidths.precioVta, maxWidth: columnWidths.precioVta }}
-                            title={formatCurrency(row['PrecioVta'])}
+                            title={formatCurrency(row['PrecioVta'] || 0)}
                           >
-                            {formatCurrency(row['PrecioVta'])}
+                            {formatCurrency(row['PrecioVta'] || 0)}
                           </td>
                           <td 
                             className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"

@@ -27,3 +27,6 @@ assets/
 *.sln
 *.sw?
 *.env
+
+
+*.json
