@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Papa from 'papaparse';
+import ResponsiveTable from './ResponsiveTable';
 import { Search, Settings, ChevronLeft, ChevronRight, LogOut, Sun, Moon, Menu } from 'lucide-react';
 import { useTheme } from '../../../context/themeContext';
 import granautoLogo from '../../../assets/granauto.png';
@@ -338,202 +339,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         ) : (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
             {currentRecords.length === 0 ? (
-              <div className="p-8 text-center">
-                <p>No hay datos disponibles que coincidan con los filtros seleccionados</p>
-              </div>
-            ) : (
-              // Tamaño de la tabla
-              <div className="overflow-auto" style={{ height: '640px' }}>
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
-                  <thead className="bg-gray-200 dark:bg-gray-700 sticky top-0 z-10">
-                    <tr>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.index }}
-                      >
-                        #
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.numeroInventario }}
-                      >
-                        No. Inv
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.anio }}
-                      >
-                        Año
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.diasInv }}
-                      >
-                        Días en inventario
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.caracteristicas }}
-                      >
-                        Auto versión
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.precioVta }}
-                      >
-                        Precio de venta
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.origen }}
-                      >
-                        Origen
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.ubicacion }}
-                      >
-                        Ubicación
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.numero }}
-                      >
-                        Vin
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.color }}
-                      >
-                        Color
-                      </th>
-                      <th 
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        style={{ width: columnWidths.obsVeh }}
-                      >
-                        Observaciones vehículo
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {currentRecords.map((row, index) => {
-                      const indexOfFirstRecord = (currentPage - 1) * recordsPerPage;
-                      const isEven = (indexOfFirstRecord + index) % 2 === 0;
-                      const isSelected = selectedRow === index;
-                      
-                      return (
-                        <tr 
-                          key={index}
-                          className={`
-                            cursor-pointer
-                            ${isEven ? 
-                              "bg-gray-50 dark:bg-gray-700/40" : 
-                              "bg-white dark:bg-gray-800"}
-                            ${isSelected ? 
-                              // Selección de fila 
-                              "outline outline-2 outline-blue-500 dark:outline-blue-400 relative z-10" : 
-                              ""}
-                            hover:bg-blue-50 dark:hover:bg-blue-900/30 
-                            transition-colors duration-150
-                          `}
-                          onClick={() => handleRowClick(index)}
-                        >
-                          {/* Nueva columna para enumerar las filas */}
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.index, maxWidth: columnWidths.index }}
-                          >
-                            {indexOfFirstRecord + index + 1}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate" 
-                            style={{ width: columnWidths.numeroInventario, maxWidth: columnWidths.numeroInventario }}
-                            title={row['NumeroInventario'] || row['No']}
-                          >
-                            {row['NumeroInventario'] || row['No']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.anio, maxWidth: columnWidths.anio }}
-                            title={row['Anio']}
-                          >
-                            {row['Anio']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.diasInv, maxWidth: columnWidths.diasInv }}
-                            title={row['DiasEnInv'] === undefined || row['DiasEnInv'] === null ? '0' : row['DiasEnInv']}
-                          >
-                            {row['DiasEnInv'] === undefined || row['DiasEnInv'] === null ? '0' : row['DiasEnInv']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
-                            style={{ 
-                              width: columnWidths.caracteristicas, 
-                              maxWidth: columnWidths.caracteristicas,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}
-                            title={row['Caracteristicas']}
-                          >
-                            {row['Caracteristicas']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.precioVta, maxWidth: columnWidths.precioVta }}
-                            title={formatCurrency(row['PrecioVta'] || 0)}
-                          >
-                            {formatCurrency(row['PrecioVta'] || 0)}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.origen, maxWidth: columnWidths.origen }}
-                            title={row['Origen']}
-                          >
-                            {row['Origen']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.ubicacion, maxWidth: columnWidths.ubicacion }}
-                            title={row['Ubicacion']}
-                          >
-                            {row['Ubicacion']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.numero, maxWidth: columnWidths.numero }}
-                            title={row['Numero']}
-                          >
-                            {row['Numero']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 truncate"
-                            style={{ width: columnWidths.color, maxWidth: columnWidths.color }}
-                            title={row['Color']}
-                          >
-                            {row['Color']}
-                          </td>
-                          <td 
-                            className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
-                            style={{ 
-                              width: columnWidths.obsVeh, 
-                              maxWidth: columnWidths.obsVeh,
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis'
-                            }}
-                            title={row['Obs_Veh']}
-                          >
-                            {row['Obs_Veh']}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+  <div className="p-8 text-center">
+    <p>No hay datos disponibles que coincidan con los filtros seleccionados</p>
+  </div>
+) : (
+  <ResponsiveTable 
+    data={currentRecords}
+    currentPage={currentPage}
+    recordsPerPage={recordsPerPage}
+    formatCurrency={formatCurrency}
+    columnWidths={columnWidths}
+    selectedRow={selectedRow}
+    handleRowClick={handleRowClick}
+  />
+)}
 
             {/* Paginación */}
             {filteredData.length > 0 && (
