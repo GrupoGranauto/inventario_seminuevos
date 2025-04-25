@@ -1,7 +1,13 @@
-const cron = require('node-cron');
-const { updateCSVFromBigQuery } = require('./updateCSVFromBigQuery');
-const fs = require('fs');
-const path = require('path');
+// scheduleCSV.js - Versión corregida usando ESM
+import cron from 'node-cron';
+import { updateCSVFromBigQuery } from './updateCSV.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Obtener la ruta del archivo actual
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Ruta para el archivo de logs
 const LOG_FILE = path.join(__dirname, '../../logs/csv-update.log');
@@ -23,8 +29,8 @@ function logToFile(message) {
 
 // Programar la tarea para ejecutarse todos los días a las 4:00 AM
 // Formato cron: minuto hora día-mes mes día-semana
-// 0 4 * * * = a las 4:00 AM todos los días
-cron.schedule('0 4 * * *', async () => {
+// 30 10 * * * = a las 10:30 AM todos los días
+cron.schedule('30 10 * * *', async () => {
   logToFile('Iniciando actualización programada del CSV desde BigQuery');
   
   try {
@@ -40,7 +46,7 @@ cron.schedule('0 4 * * *', async () => {
   }
 });
 
-logToFile('Servicio de actualización de CSV iniciado. Se ejecutará todos los días a las 4:00 AM.');
+logToFile('Servicio de actualización de CSV iniciado. Se ejecutará todos los días');
 
 // Mantener el proceso vivo
 process.stdin.resume();
