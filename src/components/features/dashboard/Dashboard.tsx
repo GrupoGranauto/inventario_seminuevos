@@ -326,7 +326,20 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
         </div>
 
         {/* Componente de filtros */}
-        {!loading && <DashboardFilters onFilterChange={handleFilterChange} />}
+        {!loading && (
+          <DashboardFilters
+            onFilterChange={handleFilterChange}
+            years={
+              Array.from(
+                new Set(
+                  tableData
+                    .map(row => row.Anio)
+                    .filter((anio): anio is string => typeof anio === 'string' && anio.trim() !== '')
+                )
+              ).sort((a, b) => Number(b) - Number(a))
+            }
+          />
+        )}
 
         {/* Área de contenido principal */}
         {loading ? (

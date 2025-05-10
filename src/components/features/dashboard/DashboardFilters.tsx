@@ -4,6 +4,7 @@ import { Search, Filter, X } from 'lucide-react';
 
 interface DashboardFiltersProps {
   onFilterChange: (filters: FilterValues) => void;
+  years: string[]; // Añadimos los años disponibles como prop
 }
 
 export interface FilterValues {
@@ -12,6 +13,9 @@ export interface FilterValues {
   origen: string;
   minDiasEnInv: string;
   maxDiasEnInv: string;
+  minPrecio: string; // Nuevo filtro para precio mínimo
+  maxPrecio: string; // Nuevo filtro para precio máximo
+  year: string;      // Nuevo filtro para año
 }
 
 // Datos para los menús desplegables
@@ -31,13 +35,16 @@ const ubicaciones = [
   { value: "Granauto", label: "Granauto" }
 ];
 
-const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) => {
+const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange, years }) => {
   const [filters, setFilters] = useState<FilterValues>({
     searchText: '',
     ubicacion: '',
     origen: '',
     minDiasEnInv: '',
     maxDiasEnInv: '',
+    minPrecio: '',
+    maxPrecio: '',
+    year: '',
   });
   
   const [isMobile, setIsMobile] = useState(false);
@@ -78,6 +85,9 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
       origen: '',
       minDiasEnInv: '',
       maxDiasEnInv: '',
+      minPrecio: '',
+      maxPrecio: '',
+      year: '',
     };
     setFilters(resetFilters);
     onFilterChange(resetFilters);
@@ -193,6 +203,26 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
               </Select>
             </FormControl>
 
+            {/* Filtro por año */}
+            <FormControl fullWidth>
+              <InputLabel id="year-label">Año</InputLabel>
+              <Select
+                labelId="year-label"
+                id="year"
+                name="year"
+                value={filters.year}
+                label="Año"
+                onChange={handleSelectChange}
+              >
+                <MenuItem value="">Todos los años</MenuItem>
+                {years.map((year) => (
+                  <MenuItem key={year} value={year}>
+                    {year}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
             {/* Rango de días en inventario */}
             <div className="flex gap-2 items-center">
               <TextField
@@ -214,6 +244,33 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
                 label="Max días"
                 type="number"
                 value={filters.maxDiasEnInv}
+                onChange={handleInputChange}
+                InputProps={{ inputProps: { min: 0 } }}
+                fullWidth
+              />
+            </div>
+
+            {/* Rango de precios */}
+            <div className="flex gap-2 items-center">
+              <TextField
+                name="minPrecio"
+                label="Precio min"
+                type="number"
+                value={filters.minPrecio}
+                onChange={handleInputChange}
+                InputProps={{ inputProps: { min: 0 } }}
+                fullWidth
+              />
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mx: 1 }}>
+                <span className="text-gray-500">a</span>
+              </Box>
+              
+              <TextField
+                name="maxPrecio"
+                label="Precio max"
+                type="number"
+                value={filters.maxPrecio}
                 onChange={handleInputChange}
                 InputProps={{ inputProps: { min: 0 } }}
                 fullWidth
@@ -332,6 +389,26 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
           </Select>
         </FormControl>
 
+        {/* Filtro por año */}
+        <FormControl sx={{ minWidth: '120px' }}>
+          <InputLabel id="year-label">Año</InputLabel>
+          <Select
+            labelId="year-label"
+            id="year"
+            name="year"
+            value={filters.year}
+            label="Año"
+            onChange={handleSelectChange}
+          >
+            <MenuItem value="">Todos</MenuItem>
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
         {/* Rango de días en inventario */}
         <TextField
           name="minDiasEnInv"
@@ -352,6 +429,31 @@ const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange }) =
           label="Max días"
           type="number"
           value={filters.maxDiasEnInv}
+          onChange={handleInputChange}
+          InputProps={{ inputProps: { min: 0 } }}
+          sx={{ width: '120px' }}
+        />
+
+        {/* Rango de precios */}
+        <TextField
+          name="minPrecio"
+          label="$ Min"
+          type="number"
+          value={filters.minPrecio}
+          onChange={handleInputChange}
+          InputProps={{ inputProps: { min: 0 } }}
+          sx={{ width: '120px' }}
+        />
+        
+        <Box sx={{ display: 'flex', alignItems: 'center', mx: 1 }}>
+          <span className="text-gray-500">a</span>
+        </Box>
+        
+        <TextField
+          name="maxPrecio"
+          label="$ Max"
+          type="number"
+          value={filters.maxPrecio}
           onChange={handleInputChange}
           InputProps={{ inputProps: { min: 0 } }}
           sx={{ width: '120px' }}
