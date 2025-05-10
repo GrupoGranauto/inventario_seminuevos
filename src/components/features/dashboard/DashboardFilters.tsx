@@ -32,7 +32,8 @@ const ubicaciones = [
   { value: "Morelos", label: "Morelos" },
   { value: "Nissauto", label: "Nissauto" },
   { value: "Macroplaza", label: "Macroplaza" },
-  { value: "Granauto", label: "Granauto" }
+  { value: "Granauto", label: "Granauto" },
+  { value: "QUIROGA", label: "Quiroga" }
 ];
 
 const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange, years }) => {

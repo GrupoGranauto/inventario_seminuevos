@@ -75,6 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             'AUTO CLINICA MACRO': 'Auto Clínica Macroplaza',
             'ENTREGADO': 'Entregado',
             'MITSU CHIHUA-SEMI': 'Mitsu Chihuahua',
+            'QUIROGA': 'Quiroga',
           };
 
           // Mapeo del campo origen
@@ -92,6 +93,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
             'MACROPLAZA': 'Macroplaza',
             'GRANAUTO': 'Granauto',
             'NISSAUTO': 'Nissauto',
+            'QUIROGA': 'Quiroga',
           };
   
           // Transformación de los datos
@@ -138,6 +140,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
   }, []);
 
   // Manejo de cambios en los filtros
+  // Manejo de cambios en los filtros
   const handleFilterChange = (filters: FilterValues) => {
     // Resetear a la primera página cuando se aplican filtros
     setCurrentPage(1);
@@ -158,17 +161,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout }) => {
       // Filtro por origen
       const origenMatch = !filters.origen || row.Origen === filters.origen;
       
+      // Filtro por año - Corregido para comparar strings adecuadamente
+      const yearMatch = !filters.year || row.Anio === filters.year;
+      
       // Filtro por rango de días en inventario
       const diasEnInv = parseInt(row.DiasEnInv ?? '0', 10);
       const minDiasMatch = !filters.minDiasEnInv || diasEnInv >= parseInt(filters.minDiasEnInv, 10);
       const maxDiasMatch = !filters.maxDiasEnInv || diasEnInv <= parseInt(filters.maxDiasEnInv, 10);
       
-      // Precio mayor que 1
+      // Filtro por rango de precios - Corregido para manejar strings de formato monetario
       const precioStr = row.PrecioVta ?? '0';
       const precio = parseFloat(precioStr.replace(/[^0-9.-]+/g, ''));
-      const precioMatch = precio > 1;
       
-      return searchMatch && ubicacionMatch && origenMatch && minDiasMatch && maxDiasMatch && precioMatch;
+      const minPrecioMatch = !filters.minPrecio || precio >= parseFloat(filters.minPrecio);
+      const maxPrecioMatch = !filters.maxPrecio || precio <= parseFloat(filters.maxPrecio);
+      
+      return searchMatch && ubicacionMatch && origenMatch && yearMatch && minDiasMatch && maxDiasMatch && minPrecioMatch && maxPrecioMatch;
     });
     
     setFilteredData(filtered);
