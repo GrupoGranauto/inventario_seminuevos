@@ -72,7 +72,7 @@ function Login({ onLoginSuccess }: LoginProps) {
       <div
         className="hidden lg:flex lg:w-2/3 relative bg-purple-900"
         style={{
-          backgroundImage: `url('/src/assets/AutoInsights.jpg')`,
+          backgroundImage: `url('/public/AutoInsights.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
