@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Moon, Sun, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../../context/themeContext';
 import googleLogo from '../../../assets/google-logo.png';
+import autoInsightsBackground from '/public/AutoInsights.jpg'; // Importamos la imagen de fondo
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 
@@ -72,7 +73,7 @@ function Login({ onLoginSuccess }: LoginProps) {
       <div
         className="hidden lg:flex lg:w-2/3 relative bg-purple-900"
         style={{
-          backgroundImage: `url('/public/AutoInsights.jpg')`,
+          backgroundImage: `url(${autoInsightsBackground})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
