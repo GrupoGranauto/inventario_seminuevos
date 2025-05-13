@@ -5,11 +5,9 @@ import Dashboard from './components/features/dashboard/Dashboard';
 import { ThemeProvider } from './context/themeContext'; 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import SessionTimeoutAlert from './components/common/SessionTimeoutAlert';
-//import dotenv from 'dotenv';
 
-//dotenv.config();
-
-const GOOGLE_CLIENT_ID = ''; 
+// Usar variable de entorno para el Google Client ID
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function App() {
   // Verificar si el usuario está autenticado (desde localStorage)

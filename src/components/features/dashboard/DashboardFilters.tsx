@@ -33,8 +33,9 @@ const ubicaciones = [
   { value: "Nissauto", label: "Nissauto" },
   { value: "Macroplaza", label: "Macroplaza" },
   { value: "Granauto", label: "Granauto" },
-  { value: "QUIROGA", label: "Quiroga" }
+  { value: "Quiroga", label: "Quiroga" }
 ];
+
 
 const DashboardFilters: React.FC<DashboardFiltersProps> = ({ onFilterChange, years }) => {
   const [filters, setFilters] = useState<FilterValues>({
