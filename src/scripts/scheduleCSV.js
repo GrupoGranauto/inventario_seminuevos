@@ -5,6 +5,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+console.log('El script scheduleCSV.js está activo y en ejecución.');
+
 // Obtener la ruta del archivo actual
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,10 +29,10 @@ function logToFile(message) {
   console.log(message);
 }
 
-// Programar la tarea para ejecutarse todos los días a las 4:00 AM
+// Programar la tarea para ejecutarse todos los días a las 2:00 PM
 // Formato cron: minuto hora día-mes mes día-semana
-// 30 10 * * * = a las 10:30 AM todos los días
-cron.schedule('30 10 * * *', async () => {
+// 0 14 * * * = a las 2:00 PM todos los días
+cron.schedule('0 12 * * *', async () => {
   logToFile('Iniciando actualización programada del CSV desde BigQuery');
   
   try {
