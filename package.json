@@ -12,7 +12,8 @@
     "start-csv-service": "pm2 start ecosystem.config.js",
     "stop-csv-service": "pm2 stop csv-update-service",
     "update-csv-now": "node src/scripts/updateCSV.js",
-    "schedule-csv": "node src/scripts/scheduleCSV.js"
+    "schedule-csv": "node src/scripts/scheduleCSV.js",
+    "start-scheduler": "node src/scripts/scheduleCSV.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -10,6 +10,13 @@ node_modules
 dist
 dist-ssr
 *.local
+<<<<<<< HEAD
+=======
+
+# Assets
+*.env.development
+
+>>>>>>> 0afb3ad (update: 27/05)
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
