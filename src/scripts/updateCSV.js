@@ -13,7 +13,6 @@ const bigquery = new BigQuery({
   keyFilename: path.join(__dirname, '../credentials/bigquery-key.json'),
 });
 
-// Ruta donde se guardará el CSV
 const CSV_PATH = path.join(__dirname, '../assets/data/inv_seminuevos.csv');
 
 // Query SQL para extraer datos de BigQuery
@@ -57,7 +56,6 @@ function convertToCSV(data) {
     console.error('No hay datos para convertir a CSV');
     return '';
   }
-
   // Obtener encabezados (keys del primer objeto)
   const headers = Object.keys(data[0]);
   
